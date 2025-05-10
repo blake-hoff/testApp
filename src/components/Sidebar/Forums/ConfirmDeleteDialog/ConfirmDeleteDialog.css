@@ -1,0 +1,61 @@
+/* ###################################### */
+/* To handle the deleting a comment */
+/* ###################################### */
+
+.delete-confirm-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .delete-dialog {
+    background-color: #fff;
+    padding: 24px 32px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    max-width: 380px;
+  }
+  
+  .delete-dialog p {
+    font-size: 18px;
+  }
+  
+  .dialog-actions {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .confirm-btn {
+    background-color: #e74c3c;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .cancel-btn {
+    background-color: #ccc;
+    color: #333;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .confirm-btn:hover {
+    background-color: #c0392b;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #bbb;
+  }

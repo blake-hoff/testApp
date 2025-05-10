@@ -1,0 +1,101 @@
+.sidebar {
+    width: 250px;
+    background-color: #1e1e2f;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar-header {
+    margin-bottom: 30px;
+  }
+  
+  .sidebar-header h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #fff;
+  }
+  
+  /* Sidebar Navigation */
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+  
+  .sidebar-button {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: left;
+    transition: all 0.2s ease;
+  }
+  
+  .sidebar-button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+  
+  .sidebar-button.active {
+    background-color: #4a76cf;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar-icon {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+
+/* Completion Stats Section */
+.completion-stats {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .completion-stats h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #ddd;
+  }
+  
+  .stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 6px;
+  }
+  
+  .stat-label {
+    color: #bbb;
+  }
+  
+  .stat-value {
+    font-weight: bold;
+    color: #fff;
+  }
+  .user-profile-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #2c2f38;
+    padding: 10px 16px;
+    margin: 8px 0;
+    font-weight: bold;
+  }
+  
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+  }

@@ -1,0 +1,145 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #1e2a3a;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
+  margin: 100px auto;
+  background-color: #f5f7fa;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.login-container h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333;
+  text-align: center;
+}
+
+.login-container p {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.login-container .login-input-group {
+  margin-bottom: 20px;
+}
+
+.login-container label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #444;
+}
+
+.login-container input,
+.login-container button {
+  width: 100%;
+}
+
+.login-container input {
+  padding: 12px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #fff;
+  color: #333;
+}
+
+.login-container input:focus {
+  border-color: #4a76cf;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 118, 207, 0.3);
+}
+
+.login-container button {
+  padding: 12px;
+  background-color: #4a76cf;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.login-container button:hover {
+  background-color: #3a5a97;
+}
+
+/*##############################*/
+/* CSS FOR THE LOGIN */
+/*##############################*/
+  .logout-button {
+    padding: 10px;
+    background-color: #4a76cf;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .logout-button:hover {
+    background-color: #3a5a97;
+  }
+
+  .success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 8px;
+    margin:10px;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+/*##############################*/
+/* CSS FOR THE SIGN UP SECTION */
+/*##############################*/
+  .signup-section {
+    font-style: italic;
+    font-size: 14px;
+  }
+  
+  .signup-link {
+    font-style: normal;
+    font-weight: 500;
+    margin-left: 2px;
+    color: #4a76cf;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  .signup-link:hover {
+    color: #3a5a97;
+    text-decoration: underline;
+  }
+  .profile-button {
+  padding: 12px;
+  background-color: #4a76cf;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.profile-button:hover {
+  background-color: #3a5a97;
+}

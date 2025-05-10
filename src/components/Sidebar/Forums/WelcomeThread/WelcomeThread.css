@@ -1,0 +1,215 @@
+.welcome-thread {
+    width: 100%;
+  }
+  
+  .thread-header {
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 12px;
+  }
+  
+  .thread-header h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  
+  .thread-description {
+    color: #666;
+    font-style: italic;
+    font-size: 16px;
+  }
+  
+  .messages-container {
+    margin-bottom: 32px;
+  }
+  
+  .message {
+    background-color: #fff;
+    margin-bottom: 20px;
+    padding: 16px;
+    border-radius: 8px;
+    border-left: 4px solid #4a76cf;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .message:last-child {
+    margin-bottom: 0;
+  }
+  
+  .message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .author {
+    font-weight: bold;
+    color: #3a5a97;
+    font-size: 16px;
+  }
+  
+  .timestamp {
+    color: #777;
+    font-size: 14px;
+  }
+  
+  .message-content {
+    line-height: 1.6;
+    color: #333;
+    font-size: 15px;
+  }
+  
+  .reply-form {
+    background-color: #f5f7fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  
+  .username-field {
+    margin-bottom: 16px;
+  }
+  
+  .username-field label {
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: bold;
+    color: #444;
+  }
+  
+  .username-field input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 220px;
+    font-size: 14px;
+  }
+  
+  .username-field input:focus {
+    border-color: #4a76cf;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 118, 207, 0.2);
+  }
+  
+  .reply-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    resize: vertical;
+    min-height: 100px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+  }
+  
+  .reply-form textarea:focus {
+    border-color: #4a76cf;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 118, 207, 0.2);
+  }
+  
+  .reply-form button {
+    padding: 10px 20px;
+    background-color: #4a76cf;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+  }
+  
+  .reply-form button:hover {
+    background-color: #3a5a97;
+  }
+  
+  /* Empty state */
+  .no-messages {
+    text-align: center;
+    padding: 40px 0;
+    color: #777;
+    font-style: italic;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .message-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .timestamp {
+      margin-top: 4px;
+    }
+    
+    .username-field input {
+      width: 100%;
+    }
+  }
+
+  .message {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+  
+  .vote-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 4px;
+  }
+  
+  .vote-column button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
+  .vote-count {
+    margin: 4px 0;
+    font-weight: bold;
+  }
+  
+  .message-body {
+    flex: 1;
+  }
+  .vote-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #888;
+  }
+  
+  .vote-btn.active-upvote {
+    color: green;
+    font-weight: bold;
+  }
+  
+  .vote-btn.active-downvote {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .delete-button {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s ease;
+  }
+  
+  .delete-button:hover {
+    color: red;
+  }
+  
