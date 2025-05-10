@@ -6,12 +6,14 @@ import { Trash2 } from 'lucide-react';
 import ConfirmDeleteDialog from '../ConfirmDeleteDialog/ConfirmDeleteDialog';
 
 
-const WelcomeThread = ({ currentUser, threads, setThreads}) => {
+const WelcomeThread = ({ currentUser, threads, setThreads, currentThreadId}) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [voteStates, setVoteStates] = useState({});
   const [threadVoteStates, setThreadVoteStates] = useState({});
   const [messageToDelete, setMessageToDelete] = useState(null);
+  
+  
 
   // const basePage = "http://localhost:5000/api/"
   const basePage = "https://blakehoff.pythonanywhere.com/api/"
@@ -27,7 +29,7 @@ const WelcomeThread = ({ currentUser, threads, setThreads}) => {
     const newMessageObj = {
       author: currentUser.username,
       text: newMessage,
-      threadId: 1
+      threadId: currentThreadId
     };
   
     fetch(basePage + 'posts', {
@@ -44,7 +46,7 @@ const WelcomeThread = ({ currentUser, threads, setThreads}) => {
         // Increment postCount in App.js
         setThreads(prevThreads =>
           prevThreads.map(thread =>
-            thread.id === 1
+            thread.id === currentThreadId
               ? { ...thread, postCount: (thread.postCount || 0) + 1 }
               : thread
           )
@@ -62,7 +64,7 @@ const WelcomeThread = ({ currentUser, threads, setThreads}) => {
 
         setThreads(prevThreads =>
           prevThreads.map(thread =>
-            thread.id === 1
+            thread.id === currentThreadId
               ? { ...thread, postCount: (thread.postCount || 1) - 1 }
               : thread
           )
@@ -85,17 +87,38 @@ const WelcomeThread = ({ currentUser, threads, setThreads}) => {
   };
   
   useEffect(() => {
-    fetch(basePage + 'posts?threadId=1') // or whatever the real thread ID is
+    fetch(`${basePage}posts?threadId=${currentThreadId}`) // or whatever the real thread ID is
       .then(res => res.json())
       .then(data => setMessages(data));
-  }, []);
+  }, [currentThreadId]);
+
+  const thread = threads.find(t => t.id === currentThreadId);
+  if (!thread) return <p>Thread not found</p>;
 
   return (
     <div className="welcome-thread forum-thread-page">
-      <div className="thread-header">
-        <h2>Welcome Thread</h2>
-        <p className="thread-description">Say hi to the community!</p>
+      <div className="thread-header" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div>
+          <h2>{thread.name}</h2>
+          <p className="thread-description">{thread.description}</p>
+        </div>
+
+        <div style={{ marginLeft: 'auto' }}>
+          <VoteControls
+            itemId={thread.id}
+            voteStates={threadVoteStates}
+            setVoteStates={setThreadVoteStates}
+            setItems={setThreads}
+            itemType="threads"
+            votes={{
+              upvotes: thread.upvotes ?? 0,
+              downvotes: thread.downvotes ?? 0
+            }}
+            handleVote={handleVote}
+          />
+        </div>
       </div>
+
       
       <div className="messages-container">
         {messages.length > 0 ? (

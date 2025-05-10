@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState} from 'react';
 import VoteControls, { handleVote } from './WelcomeThread/utils';
 import WelcomeThread from './WelcomeThread/WelcomeThread';
 import CreateThread from './CreateThread/CreateThread';
@@ -20,7 +20,7 @@ const ForumsPage = ({
   addNewThread,
   setActiveSidebarItem
 }) => {
-  const [threadsPerPage, setThreadsPerPage] = useState(3);
+  const [threadsPerPage] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortOption, setSortOption] = useState('recent');
@@ -181,29 +181,13 @@ const ForumsPage = ({
       );
     }
 
-    if (thread.id === 1) {
-      return (
-        <WelcomeThread
-          currentUser={currentUser}
-          threads={threads}
-          setThreads={setThreads}
-        />
-      );
-    }
-
     return (
-      <div className="forum-thread-page">
-        <div className="thread-header-with-meta">
-          <h2 className="thread-title">{thread.name}</h2>
-          {thread.author && (
-            <span className="thread-author">Posted by {thread.author}</span>
-          )}
-        </div>
-        <p className="thread-description">{thread.description}</p>
-        <div className="thread-messages">
-          <p className="no-messages-yet">No messages yet. Be the first to start the conversation!</p>
-        </div>
-      </div>
+      <WelcomeThread
+        currentUser={currentUser}
+        threads={threads}
+        setThreads={setThreads}
+        currentThreadId={currentThread}
+      />
     );
     
   };
