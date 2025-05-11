@@ -13,8 +13,8 @@ const App = () => {
   const [threads, setThreads] = useState([]);
   
 
-  const basePage = "http://localhost:5000/api/"
-  //const basePage = "https://blakehoff.pythonanywhere.com/api/"
+  // const basePage = "http://localhost:5000/api/"
+  const basePage = "https://blakehoff.pythonanywhere.com/api/"
 
   const [threadVoteStates, setThreadVoteStates] = useState({});
   const [currentThread, setCurrentThread] = useState(null);
