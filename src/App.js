@@ -8,21 +8,13 @@ import ForumsPage from './components/Sidebar/Forums/Forums';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [puzzles, setPuzzles] = useState([
-    { id: 1, name: 'Intro Puzzle', completed: true, solution: 'hello' },
-    { id: 2, name: 'Logic Gate', completed: false, solution: 'xor' },
-    { id: 3, name: 'Cipher Challenge', completed: false, solution: 'caesar cipher' },
-  ]);
+  const [puzzles, setPuzzles] = useState([]);
 
-  const [threads, setThreads] = useState([
-    { id: 1, name: 'Welcome Thread', description: 'Say hi to the community!', requiredPuzzleId: null },
-    { id: 2, name: 'Logic Puzzle Strategies', description: 'Share tips for the logic puzzles.', requiredPuzzleId: 2 },
-    { id: 3, name: 'Cipher Solvers', description: 'Discuss ciphers and solutions.', requiredPuzzleId: 3 },
-  ]);
+  const [threads, setThreads] = useState([]);
   
 
-  // const basePage = "http://localhost:5000/api/"
-  const basePage = "https://blakehoff.pythonanywhere.com/api/"
+  const basePage = "http://localhost:5000/api/"
+  //const basePage = "https://blakehoff.pythonanywhere.com/api/"
 
   const [threadVoteStates, setThreadVoteStates] = useState({});
   const [currentThread, setCurrentThread] = useState(null);
@@ -38,6 +30,12 @@ const App = () => {
     fetch(basePage + 'threads')
       .then(res => res.json())
       .then(data => setThreads(data));
+  }, []);
+
+  useEffect(() => {
+    fetch(basePage + 'puzzles')
+      .then(res => res.json())
+      .then(data => setPuzzles(data));
   }, []);
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+/* Layout and Cards */
 .puzzles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -23,6 +24,7 @@
   border-left: 5px solid #4caf50;
 }
 
+/* Header */
 .forum-header {
   text-align: center;
   margin-bottom: 30px;
@@ -40,24 +42,29 @@
   color: #666;
 }
 
-.view-puzzle-link {
-  display: inline-block;
+/* Puzzle Buttons */
+.puzzle-card-buttons {
+  display: flex;
+  gap: 10px;
   margin: 10px 0;
-  padding: 8px 16px;
+}
+
+.view-puzzle-button{
   background-color: #4a90e2;
   color: white;
-  text-decoration: none;
+  border: none;
+  padding: 8px 12px;
   border-radius: 8px;
+  cursor: pointer;
   font-weight: 600;
-  text-align: center;
   transition: background-color 0.2s;
 }
 
-.view-puzzle-link:hover {
+.view-puzzle-button:hover{
   background-color: #3a7bc8;
-  text-decoration: none;
 }
 
+/* Quick Form */
 .quick-solution-form {
   display: flex;
   flex-direction: column;
@@ -96,5 +103,116 @@
 .solved-badge {
   margin-top: 10px;
   font-weight: 600;
+  color: #4caf50;
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  width: 90%;
+  max-width: 600px;
+  position: relative;
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #eee;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* Puzzle Detail & Solution */
+.puzzle-description {
+  margin-top: 15px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.puzzle-hint {
+  background-color: #fffbe6;
+  border-left: 4px solid #ffcc00;
+  padding: 10px 15px;
+  margin: 20px 0;
+  border-radius: 8px;
+}
+
+.solution-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.solution-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.submit-button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #3a7bc8;
+}
+
+/* Message Box */
+.message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.message.success {
+  background-color: #e6f7e6;
+  color: #2e7d32;
+  border-left: 4px solid #4caf50;
+}
+
+.message.error {
+  background-color: #fdecea;
+  color: #d32f2f;
+  border-left: 4px solid #f44336;
+}
+
+/* Completed Message */
+.completed-message {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.completed-message h3 {
   color: #4caf50;
 }
