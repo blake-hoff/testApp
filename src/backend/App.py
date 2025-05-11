@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey, Boolean, Table
 from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 from datetime import datetime
 from flask import Flask, jsonify, request
@@ -25,6 +25,7 @@ class User(Base):
     # Relationships
     threads = relationship("Thread", back_populates="creator")
     posts = relationship("Post", back_populates="author")
+    completed_puzzles = relationship("CompletedPuzzle", back_populates="user")
 
     def __repr__(self):
         return f"<User(username='{self.username}', email='{self.email}')>"
@@ -75,10 +76,45 @@ class Puzzle(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
+    description = Column(Text)
+    external_url = Column(String(500))
+    solution_key = Column(String(100), nullable=False)
+    difficulty = Column(Integer, default=1)  # 1-5 scale
+    
+    # Relationships
     threads = relationship("Thread", back_populates="puzzle")
+    completed_by = relationship("CompletedPuzzle", back_populates="puzzle")
+    
     def __repr__(self):
         return f"<Puzzle(name='{self.name}')>"
 
+# New table to track which users have completed which puzzles
+class CompletedPuzzle(Base):
+    __tablename__ = 'completed_puzzles'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    puzzle_id = Column(Integer, ForeignKey('puzzles.id'), nullable=False)
+    completed_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User", back_populates="completed_puzzles")
+    puzzle = relationship("Puzzle", back_populates="completed_by")
+    
+    def __repr__(self):
+        return f"<CompletedPuzzle(user_id='{self.user_id}', puzzle_id='{self.puzzle_id}')>"
+
+# Link table for puzzle hints/links
+class PuzzleLink(Base):
+    __tablename__ = 'puzzle_links'
+    
+    id = Column(Integer, primary_key=True)
+    puzzle_id = Column(Integer, ForeignKey('puzzles.id'), nullable=False)
+    text = Column(String(200), nullable=False)
+    url = Column(String(500), nullable=False)
+    
+    # Relationship
+    puzzle = relationship("Puzzle")
 
 # Create database engine and tables
 def init_db(db_uri='sqlite:///forum.db'):
@@ -139,6 +175,17 @@ def create_thread():
         session.close()
         return jsonify({"error": "User not found"}), 404
 
+    # Check if thread requires a puzzle that the user hasn't completed
+    if data.get('requiredPuzzleId'):
+        completed = session.query(CompletedPuzzle).filter_by(
+            user_id=user.id, 
+            puzzle_id=data.get('requiredPuzzleId')
+        ).first()
+        
+        if not completed and not user.is_admin:
+            session.close()
+            return jsonify({"error": "You must complete the required puzzle first"}), 403
+
     new_thread = Thread(
         name=data['name'],
         description=data['description'],
@@ -198,6 +245,23 @@ def create_post():
     if not user:
         session.close()
         return jsonify({"error": "User not found"}), 404
+        
+    # Get the thread
+    thread = session.get(Thread, data['threadId'])
+    if not thread:
+        session.close()
+        return jsonify({"error": "Thread not found"}), 404
+        
+    # Check if thread requires a puzzle that the user hasn't completed
+    if thread.puzzle_id:
+        completed = session.query(CompletedPuzzle).filter_by(
+            user_id=user.id, 
+            puzzle_id=thread.puzzle_id
+        ).first()
+        
+        if not completed and not user.is_admin:
+            session.close()
+            return jsonify({"error": "You must complete the required puzzle first"}), 403
 
     new_post = Post(
         text=data['text'],
@@ -344,6 +408,183 @@ def login():
 
     return jsonify({'username': user.username, 'email': user.email})
 
+# New endpoints for puzzles functionality
+
+@app.route('/api/puzzles', methods=['GET'])
+def get_puzzles():
+    session = Session()
+    
+    # Get the username from query params
+    username = request.args.get('username')
+    
+    # Get all puzzles
+    puzzles = session.query(Puzzle).all()
+    
+    result = []
+    if username:
+        # Get the user id
+        user = session.query(User).filter_by(username=username).first()
+        
+        if user:
+            # Get their completed puzzles
+            completed_puzzle_ids = [
+                cp.puzzle_id for cp in session.query(CompletedPuzzle).filter_by(user_id=user.id).all()
+            ]
+            
+            # Format result with completion status
+            for p in puzzles:
+                # Get any related thread for this puzzle
+                related_thread = session.query(Thread).filter_by(puzzle_id=p.id).first()
+                
+                # Get links for this puzzle
+                links = session.query(PuzzleLink).filter_by(puzzle_id=p.id).all()
+                
+                puzzle_data = {
+                    "id": p.id,
+                    "name": p.name,
+                    "description": p.description,
+                    "completed": p.id in completed_puzzle_ids,
+                    "difficulty": p.difficulty
+                }
+                
+                # Add thread info if there is one
+                if related_thread:
+                    puzzle_data["threadId"] = related_thread.id
+                    puzzle_data["threadName"] = related_thread.name
+                
+                # Add links if there are any
+                if links:
+                    puzzle_data["links"] = [
+                        {"text": link.text, "url": link.url} for link in links
+                    ]
+                
+                result.append(puzzle_data)
+        else:
+            # If user not found, just return puzzles without completion status
+            for p in puzzles:
+                result.append({
+                    "id": p.id,
+                    "name": p.name,
+                    "description": p.description,
+                    "completed": False,
+                    "difficulty": p.difficulty
+                })
+    else:
+        # No username provided, return puzzles without completion status
+        for p in puzzles:
+            result.append({
+                "id": p.id,
+                "name": p.name,
+                "description": p.description,
+                "completed": False,
+                "difficulty": p.difficulty
+            })
+    
+    session.close()
+    return jsonify(result)
+
+@app.route('/api/puzzles/<int:puzzle_id>', methods=['GET'])
+def get_puzzle_detail(puzzle_id):
+    session = Session()
+    
+    # Get username from query params
+    username = request.args.get('username')
+    
+    # Get the puzzle
+    puzzle = session.get(Puzzle, puzzle_id)
+    
+    if not puzzle:
+        session.close()
+        return jsonify({"error": "Puzzle not found"}), 404
+    
+    # Get any related thread for this puzzle
+    related_thread = session.query(Thread).filter_by(puzzle_id=puzzle_id).first()
+    
+    # Get links for this puzzle
+    links = session.query(PuzzleLink).filter_by(puzzle_id=puzzle_id).all()
+    
+    # Build base response
+    result = {
+        "id": puzzle.id,
+        "name": puzzle.name,
+        "description": puzzle.description,
+        "externalUrl": puzzle.external_url,
+        "difficulty": puzzle.difficulty,
+        "completed": False
+    }
+    
+    # Add thread info if there is one
+    if related_thread:
+        result["threadId"] = related_thread.id
+        result["threadName"] = related_thread.name
+    
+    # Add links if there are any
+    if links:
+        result["links"] = [
+            {"text": link.text, "url": link.url} for link in links
+        ]
+    
+    # Check completion status if username provided
+    if username:
+        user = session.query(User).filter_by(username=username).first()
+        if user:
+            completed = session.query(CompletedPuzzle).filter_by(
+                user_id=user.id, puzzle_id=puzzle_id
+            ).first()
+            
+            result["completed"] = completed is not None
+    
+    session.close()
+    return jsonify(result)
+
+@app.route('/api/puzzles/<int:puzzle_id>/attempt', methods=['POST'])
+def attempt_puzzle_solution(puzzle_id):
+    session = Session()
+    data = request.get_json()
+    
+    # Check if puzzle exists
+    puzzle = session.get(Puzzle, puzzle_id)
+    if not puzzle:
+        session.close()
+        return jsonify({"error": "Puzzle not found"}), 404
+    
+    # Get the user
+    username = data.get('username')
+    solution_attempt = data.get('solution', '').strip().lower()
+    
+    if not username:
+        session.close()
+        return jsonify({"error": "Username is required"}), 400
+    
+    user = session.query(User).filter_by(username=username).first()
+    if not user:
+        session.close()
+        return jsonify({"error": "User not found"}), 404
+    
+    # Check if already completed
+    already_completed = session.query(CompletedPuzzle).filter_by(
+        user_id=user.id, puzzle_id=puzzle_id
+    ).first()
+    
+    if already_completed:
+        session.close()
+        return jsonify({"success": True, "message": "You've already solved this puzzle!"}), 200
+    
+    # Check solution
+    if solution_attempt == puzzle.solution_key.lower():
+        # Mark as completed
+        completion = CompletedPuzzle(
+            user_id=user.id,
+            puzzle_id=puzzle_id
+        )
+        session.add(completion)
+        session.commit()
+        session.close()
+        return jsonify({"success": True, "message": "Correct! Puzzle solved successfully!"}), 200
+    else:
+        session.close()
+        return jsonify({"success": False, "message": "Incorrect solution. Try again!"}), 200
+
 def create_admin_user():
     session = Session()
     existing_admin = session.query(User).filter_by(username='admin').first()
@@ -361,11 +602,89 @@ def create_admin_user():
         print("[INFO] Admin user already exists.")
     session.close()
 
+def create_sample_puzzles():
+    session = Session()
+    
+    # Check if we already have puzzles
+    existing_puzzles = session.query(Puzzle).count()
+    if existing_puzzles > 0:
+        print("[INFO] Puzzles already exist.")
+        session.close()
+        return
+    
+    # Create sample puzzles
+    puzzles = [
+        Puzzle(
+            name="Caesar's Secret",
+            description="Decipher this encrypted message using the Caesar cipher: Wklv lv brxu iluvw fkdoohqjh.",
+            solution_key="this is your first challenge",
+            difficulty=1
+        ),
+        Puzzle(
+            name="Math Challenge",
+            description="Find the pattern and solve: 1, 4, 9, 16, 25, ?",
+            solution_key="36",
+            difficulty=2
+        ),
+        Puzzle(
+            name="Word Riddle",
+            description="I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?",
+            solution_key="echo",
+            difficulty=2
+        )
+    ]
+    
+    session.add_all(puzzles)
+    session.commit()
+    
+    # Add some links
+    puzzle_links = [
+        PuzzleLink(
+            puzzle_id=1,
+            text="Learn about Caesar Ciphers",
+            url="https://en.wikipedia.org/wiki/Caesar_cipher"
+        ),
+        PuzzleLink(
+            puzzle_id=2, 
+            text="Number Sequences",
+            url="https://en.wikipedia.org/wiki/Square_number"
+        )
+    ]
+    
+    session.add_all(puzzle_links)
+    session.commit()
+    print("[INFO] Sample puzzles created.")
+    
+    # Create a thread for the first puzzle
+    admin = session.query(User).filter_by(username='admin').first()
+    if admin:
+        puzzle_thread = Thread(
+            name="Caesar Cipher Discussion",
+            description="Share hints and discuss the Caesar's Secret puzzle",
+            puzzle_id=1,
+            creator=admin
+        )
+        session.add(puzzle_thread)
+        session.commit()
+        
+        # Add a welcome post to the thread
+        welcome_post = Post(
+            text="Welcome to the Caesar Cipher discussion thread! Here you can share hints (but not the solution!) and ask questions about the puzzle.",
+            user_id=admin.id,
+            thread_id=puzzle_thread.id
+        )
+        session.add(welcome_post)
+        session.commit()
+        print("[INFO] Created puzzle discussion thread.")
+        
+    session.close()
+
 if __name__ == '__main__':
-    #patch_threads_with_invalid_puzzles()
     create_admin_user()
+    create_sample_puzzles()
     populate_welcome_thread_comments()
     app.run(debug=True, port=5000)
 
 create_admin_user()
+create_sample_puzzles()
 populate_welcome_thread_comments()

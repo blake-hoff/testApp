@@ -8,46 +8,49 @@ export const handleVote = (
     setItems,           
     itemType    
   ) => {
-    const currentVote = voteStates[itemId];
-    // const basePage = "http://localhost:5000/api/"
-    const basePage = "https://blakehoff.pythonanywhere.com/api/"
-  
-    let newVote;
-    if (currentVote === action) {
-      newVote = null;
-    } else {
+    const voteKey = `${itemType}-${itemId}-vote`;
+    const storedVote = localStorage.getItem(voteKey); // 'upvote', 'downvote', or null
+
+    let newVote = null;
+    if (storedVote !== action) {
       newVote = action;
     }
-  
+
+    const basePage = "https://blakehoff.pythonanywhere.com/api/";
+
     fetch(basePage + `${itemType}/${itemId}/vote`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: newVote })
     })
       .then(() => {
+        // Update local state counts
         setItems(prevItems =>
           prevItems.map(item => {
             if (item.id !== itemId) return item;
-  
-            let newUpvotes = item.upvotes ?? 0;
-            let newDownvotes = item.downvotes ?? 0;
-  
-            if (currentVote === 'upvote') newUpvotes--;
-            if (currentVote === 'downvote') newDownvotes--;
-            if (newVote === 'upvote') newUpvotes++;
-            if (newVote === 'downvote') newDownvotes++;
-  
-            return {
-              ...item,
-              upvotes: newUpvotes,
-              downvotes: newDownvotes
-            };
+
+            let upvotes = item.upvotes ?? 0;
+            let downvotes = item.downvotes ?? 0;
+
+            if (storedVote === 'upvote') upvotes--;
+            if (storedVote === 'downvote') downvotes--;
+
+            if (newVote === 'upvote') upvotes++;
+            if (newVote === 'downvote') downvotes++;
+
+            return { ...item, upvotes, downvotes };
           })
         );
         setVoteStates(prev => ({
           ...prev,
           [itemId]: newVote
         }));
+
+        if (newVote) {
+          localStorage.setItem(voteKey, newVote);
+        } else {
+          localStorage.removeItem(voteKey);  // If they unvote
+        }
       });
   };
   

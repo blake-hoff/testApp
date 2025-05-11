@@ -1,22 +1,100 @@
 .puzzles-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px 0;
-  }
-  
-  .puzzle-card {
-    background-color: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-  }
-  
-  .puzzle-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .completed-puzzle {
-    border-left: 5px solid #4caf50;
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.puzzle-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.puzzle-card:hover {
+  transform: translateY(-5px);
+}
+
+.completed-puzzle {
+  border-left: 5px solid #4caf50;
+}
+
+.forum-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px 0;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+}
+
+.forum-header h1 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.forum-header p {
+  color: #666;
+}
+
+.view-puzzle-link {
+  display: inline-block;
+  margin: 10px 0;
+  padding: 8px 16px;
+  background-color: #4a90e2;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.view-puzzle-link:hover {
+  background-color: #3a7bc8;
+  text-decoration: none;
+}
+
+.quick-solution-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.solution-input-small {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.submit-button-small {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button-small:hover:not(:disabled) {
+  background-color: #3a7bc8;
+}
+
+.submit-button-small:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.solved-badge {
+  margin-top: 10px;
+  font-weight: 600;
+  color: #4caf50;
+}
