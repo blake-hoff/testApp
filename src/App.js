@@ -3,41 +3,84 @@ import './App.css';
 import Auth from './components/AuthenticationPage/Auth';
 import Sidebar from './components/Sidebar/Sidebar';
 import PuzzlePage from './components/Sidebar/Puzzles/Puzzles';
-import SettingsPage from './components/Sidebar/Settings/Settings';
 import ForumsPage from './components/Sidebar/Forums/Forums';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [puzzles, setPuzzles] = useState([]);
-
   const [threads, setThreads] = useState([]);
   
 
-  // const basePage = "http://localhost:5000/api/"
+  //const basePage = "http://localhost:5000/api/"
   const basePage = "https://blakehoff.pythonanywhere.com/api/"
 
   const [threadVoteStates, setThreadVoteStates] = useState({});
   const [currentThread, setCurrentThread] = useState(null);
   const [activeSidebarItem, setActiveSidebarItem] = useState('forums'); // 'forums', 'puzzles', 'settings', 'create'
   const [userStats, setUserStats] = useState({
-    threadsUnlocked: 1,
-    totalThreads: 3,
-    puzzlesCompleted: 1,
-    totalPuzzles: 3
+    puzzlesCompleted: 0,
   });
 
+  // Load threads
   useEffect(() => {
     fetch(basePage + 'threads')
       .then(res => res.json())
       .then(data => setThreads(data));
   }, []);
 
+  // Load puzzles with completion status when user is available
   useEffect(() => {
-    fetch(basePage + 'puzzles')
-      .then(res => res.json())
-      .then(data => setPuzzles(data));
-  }, []);
+    const fetchPuzzlesWithCompletion = async () => {
+      try {
+        // First get all puzzles
+        const puzzlesResponse = await fetch(basePage + 'puzzles');
+        const puzzlesData = await puzzlesResponse.json();
+        
+        // If user is logged in, get their completed puzzles
+        if (currentUser && currentUser.id) {
+          const completedResponse = await fetch(`${basePage}users/${currentUser.id}/completed-puzzles`);
+          if (completedResponse.ok) {
+            const completedData = await completedResponse.json();
+            const completedIds = completedData.completed_puzzle_ids || [];
+            
+            // Mark puzzles as completed based on the user's completion data
+            const updatedPuzzles = puzzlesData.map(puzzle => ({
+              ...puzzle,
+              completed: completedIds.includes(puzzle.id)
+            }));
+            
+            setPuzzles(updatedPuzzles);
+            
+            // Update user stats based on completed puzzles
+            const completedCount = updatedPuzzles.filter(p => p.completed).length;
+            const unlockedCount = threads.filter(t =>
+              t.requiredPuzzleId === null ||
+              updatedPuzzles.find(p => p.id === t.requiredPuzzleId && p.completed)
+            ).length;
+            
+            setUserStats(prev => ({
+              ...prev,
+              puzzlesCompleted: completedCount,
+              threadsUnlocked: unlockedCount,
+              totalPuzzles: puzzlesData.length
+            }));
+          } else {
+            // If API call fails, still set puzzles without completion info
+            setPuzzles(puzzlesData);
+          }
+        } else {
+          // If no user, just set puzzles without completion info
+          setPuzzles(puzzlesData);
+        }
+      } catch (error) {
+        console.error('Error fetching puzzles:', error);
+      }
+    };
+    
+    fetchPuzzlesWithCompletion();
+  }, [currentUser, threads]); // Re-fetch when user or threads change
 
+  // Load user from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -58,32 +101,45 @@ const App = () => {
   const handlePuzzleAttempt = async (puzzleId, attempt) => {
     try {
       const puzzle = puzzles.find(p => p.id === puzzleId);
-      
       if (!puzzle) {
         console.error(`Puzzle with id ${puzzleId} not found`);
         return false;
       }
       
-      // Just for testing - consider any non-empty attempt as correct
-      if (attempt && attempt.length > 0) {
+      // Compare the user's attempt with the puzzle's solution
+      const userAttempt = attempt.trim().toLowerCase();
+      const response = await fetch(`${basePage}puzzles/${puzzle.id}/attempt`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              username: currentUser.username,
+              solution: userAttempt
+          })
+      });
+
+      const data = await response.json();
+
+      if (data.success === true) {
+        // Only update the specific puzzle that was solved
         const updatedPuzzles = puzzles.map(p => {
           if (p.id === puzzleId) {
             return { ...p, completed: true };
           }
           return p;
         });
-  
+
         setPuzzles(updatedPuzzles);
-  
+
         const completedCount = updatedPuzzles.filter(p => p.completed).length;
         const unlockedCount = threads.filter(t =>
           t.requiredPuzzleId === null ||
           updatedPuzzles.find(p => p.id === t.requiredPuzzleId && p.completed)
         ).length;
-  
+
         setUserStats({
           ...userStats,
-          threadsUnlocked: unlockedCount,
           puzzlesCompleted: completedCount
         });
         
@@ -120,12 +176,6 @@ const App = () => {
     };
     
     setThreads([...threads, threadToAdd]);
-    setUserStats(prev => ({
-      ...prev,
-      ...userStats,
-      threadsUnlocked: prev.threadsUnlocked + 1,
-      totalThreads: userStats.totalThreads + 1
-    }));
     
     // Switch back to forums view and show the newly created thread
     setActiveSidebarItem('forums');
@@ -155,10 +205,9 @@ const App = () => {
         <PuzzlePage
           puzzles={puzzles}
           handlePuzzleAttempt={handlePuzzleAttempt}
+          currentUser={currentUser}  // Pass the currentUser to PuzzlePage
         />
       );
-    } else if (activeSidebarItem === 'settings') {
-        return <SettingsPage />;
     } 
   };
 

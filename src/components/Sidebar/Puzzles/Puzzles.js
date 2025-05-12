@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './Puzzles.css';
 import PuzzleDetail from './PuzzleDetail';
 
-const PuzzlePage = ({ puzzles, handlePuzzleAttempt }) => {
+const PuzzlePage = ({ puzzles, handlePuzzleAttempt, currentUser }) => {
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [message, setMessage] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);

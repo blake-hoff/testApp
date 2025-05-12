@@ -143,3 +143,114 @@ body {
 .profile-button:hover {
   background-color: #3a5a97;
 }
+
+.login-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 90vh;
+}
+
+.welcome-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  background: linear-gradient(135deg, #4a76cf 0%, #6a91e3 100%);
+  color: white;
+  padding: 36px 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.app-title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.app-subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  opacity: 0.5;
+  margin: 0 auto;
+}
+
+/* .welcome-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  background: linear-gradient(135deg, #4a76cf 0%, #6a91e3 100%);
+  color: white;
+  padding: 36px 32px;
+  border-radius: 16px;
+  box-shadow:
+    0 0 20px rgba(255, 255, 255, 0.2),
+    0 0 40px rgba(255, 255, 255, 0.15),
+    0 0 80px rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 1;
+} */
+
+.welcome-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  background: linear-gradient(135deg, #5b8eff 0%, #80aaff 100%);
+  color: white;
+  padding: 36px 32px;
+  border-radius: 16px;
+  box-shadow:
+    0 0 30px rgba(255, 255, 255, 0.5),
+    0 0 60px rgba(255, 255, 255, 0.4),
+    0 0 120px rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  position: relative;
+  z-index: 1;
+}
+.floating-puzzles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.puzzle-icon {
+  position: absolute;
+  font-size: 28px;
+  opacity: 0.08;
+  animation: floatUp 12s ease-in-out infinite;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.08;
+  }
+  50% {
+    transform: translateY(-20px) rotate(10deg);
+    opacity: 0.15;
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.08;
+  }
+}

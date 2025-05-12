@@ -9,7 +9,7 @@ const Sidebar = ({ currentUser, userStats, activeSidebarItem, setActiveSidebarIt
       </div>
 
       <nav className="sidebar-nav">
-        {['forums', 'puzzles', 'settings'].map(item => (
+        {['forums', 'puzzles'].map(item => (
           <button 
             key={item}
             className={`sidebar-button ${activeSidebarItem === item ? 'active' : ''}`}
@@ -29,12 +29,8 @@ const Sidebar = ({ currentUser, userStats, activeSidebarItem, setActiveSidebarIt
       <div className="completion-stats">
         <h3>Your Progress</h3>
         <div className="stat-item">
-          <span className="stat-label">Threads Unlocked:</span>
-          <span className="stat-value">{userStats.threadsUnlocked}/{userStats.totalThreads}</span>
-        </div>
-        <div className="stat-item">
           <span className="stat-label">Puzzles Completed:</span>
-          <span className="stat-value">{userStats.puzzlesCompleted}/{userStats.totalPuzzles}</span>
+          <span className="stat-value">{userStats.puzzlesCompleted}</span>
         </div>
       </div>
 

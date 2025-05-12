@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 Base = declarative_base()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000", "https://blake-hoff.github.io"])
+CORS(app, origins=["http://localhost:3000"])
 
 # User model
 class User(Base):
@@ -91,28 +91,17 @@ class Puzzle(Base):
 # New table to track which users have completed which puzzles
 class CompletedPuzzle(Base):
     __tablename__ = 'completed_puzzles'
-    
+
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     puzzle_id = Column(Integer, ForeignKey('puzzles.id'), nullable=False)
-    completed_at = Column(DateTime, default=datetime.utcnow)
-    
+
     # Relationships
     user = relationship("User", back_populates="completed_puzzles")
     puzzle = relationship("Puzzle", back_populates="completed_by")
-    
-    def __repr__(self):
-        return f"<CompletedPuzzle(user_id='{self.user_id}', puzzle_id='{self.puzzle_id}')>"
 
-    __tablename__ = 'puzzle_links'
-    
-    id = Column(Integer, primary_key=True)
-    puzzle_id = Column(Integer, ForeignKey('puzzles.id'), nullable=False)
-    text = Column(String(200), nullable=False)
-    url = Column(String(500), nullable=False)
-    
-    # Relationship
-    puzzle = relationship("Puzzle")
+    def __repr__(self):
+        return f"<CompletedPuzzle(user_id={self.user_id}, puzzle_id={self.puzzle_id}>"
 
 # Create database engine and tables
 def init_db(db_uri='sqlite:///forum.db'):
@@ -304,6 +293,32 @@ def vote_on_post(post_id):
     return handle_vote(Post, post_id)
 
 
+@app.route('/api/users/<int:user_id>/completed-puzzles', methods=['GET'])
+def get_user_completed_puzzles(user_id):
+    """
+    Get all completed puzzles for a specific user
+    """
+    try:
+        # Verify user exists
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+            
+        # Query completed puzzles for this user
+        completed_puzzles = CompletedPuzzle.query.filter_by(user_id=user_id).all()
+        
+        # Format the response
+        puzzle_ids = [cp.puzzle_id for cp in completed_puzzles]
+        
+        return jsonify({
+            "user_id": user_id,
+            "completed_puzzle_ids": puzzle_ids,
+            "count": len(puzzle_ids)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/threads/<int:thread_id>/vote', methods=['PATCH'])
 def vote_on_thread(thread_id):
     return handle_vote(Thread, thread_id)
@@ -434,9 +449,6 @@ def get_puzzles():
                 # Get any related thread for this puzzle
                 related_thread = session.query(Thread).filter_by(puzzle_id=p.id).first()
                 
-                # Get links for this puzzle
-                links = session.query(PuzzleLink).filter_by(puzzle_id=p.id).all()
-                
                 puzzle_data = {
                     "id": p.id,
                     "name": p.name,
@@ -449,13 +461,6 @@ def get_puzzles():
                 if related_thread:
                     puzzle_data["threadId"] = related_thread.id
                     puzzle_data["threadName"] = related_thread.name
-                
-                # Add links if there are any
-                if links:
-                    puzzle_data["links"] = [
-                        {"text": link.text, "url": link.url} for link in links
-                    ]
-                
                 result.append(puzzle_data)
         else:
             # If user not found, just return puzzles without completion status
@@ -498,9 +503,6 @@ def get_puzzle_detail(puzzle_id):
     # Get any related thread for this puzzle
     related_thread = session.query(Thread).filter_by(puzzle_id=puzzle_id).first()
     
-    # Get links for this puzzle
-    links = session.query(PuzzleLink).filter_by(puzzle_id=puzzle_id).all()
-    
     # Build base response
     result = {
         "id": puzzle.id,
@@ -515,13 +517,7 @@ def get_puzzle_detail(puzzle_id):
     if related_thread:
         result["threadId"] = related_thread.id
         result["threadName"] = related_thread.name
-    
-    # Add links if there are any
-    if links:
-        result["links"] = [
-            {"text": link.text, "url": link.url} for link in links
-        ]
-    
+
     # Check completion status if username provided
     if username:
         user = session.query(User).filter_by(username=username).first()
@@ -560,13 +556,11 @@ def attempt_puzzle_solution(puzzle_id):
         return jsonify({"error": "User not found"}), 404
     
     # Check if already completed
-    already_completed = session.query(CompletedPuzzle).filter_by(
-        user_id=user.id, puzzle_id=puzzle_id
-    ).first()
+    already_completed = session.query(CompletedPuzzle).filter_by(user_id=user.id, puzzle_id=puzzle_id).first()
     
     if already_completed:
         session.close()
-        return jsonify({"success": True, "message": "You've already solved this puzzle!"}), 200
+        return jsonify({"success": True, "message": "You've already solved this puzzle!"}), 202
     
     # Check solution
     if solution_attempt == puzzle.solution_key.lower():
@@ -581,7 +575,7 @@ def attempt_puzzle_solution(puzzle_id):
         return jsonify({"success": True, "message": "Correct! Puzzle solved successfully!"}), 200
     else:
         session.close()
-        return jsonify({"success": False, "message": "Incorrect solution. Try again!"}), 200
+        return jsonify({"success": False, "message": "Incorrect solution. Try again!"}), 201
 
 def create_admin_user():
     session = Session()
@@ -689,7 +683,7 @@ def create_sample_puzzles():
 
 if __name__ == '__main__':
     create_admin_user()
-    # create_sample_puzzles()
+    create_sample_puzzles()
     populate_welcome_thread_comments()
     app.run(debug=True, port=5000)
 
