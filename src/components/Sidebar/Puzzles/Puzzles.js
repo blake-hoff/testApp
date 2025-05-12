@@ -6,13 +6,13 @@ const PuzzlePage = ({ puzzles, handlePuzzleAttempt }) => {
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [message, setMessage] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showSolutionModal, setShowSolutionModal] = useState(false);
 
   const handleSubmit = async (e, puzzleId) => {
     e.preventDefault();
     const input = e.target.elements[`keyword-${puzzleId}`].value.trim().toLowerCase();
 
     try {
+      // Pass the input to the handlePuzzleAttempt function
       const result = await handlePuzzleAttempt(puzzleId, input);
       if (result) {
         e.target.reset();
@@ -30,23 +30,12 @@ const PuzzlePage = ({ puzzles, handlePuzzleAttempt }) => {
     const puzzle = puzzles.find(p => p.id === puzzleId);
     setSelectedPuzzle(puzzle);
     setShowDetailModal(true);
-    setMessage(null);
-  };
-
-  const openSolutionModal = (puzzleId) => {
-    const puzzle = puzzles.find(p => p.id === puzzleId);
-    setSelectedPuzzle(puzzle);
-    setShowSolutionModal(true);
-    setMessage(null);
+    setMessage(null); // Clear any previous messages
   };
 
   const closeDetailModal = () => {
     setShowDetailModal(false);
-  };
-
-  const closeSolutionModal = () => {
-    setShowSolutionModal(false);
-    setMessage(null);
+    setMessage(null); // Clear any messages when closing
   };
 
   return (
@@ -92,52 +81,42 @@ const PuzzlePage = ({ puzzles, handlePuzzleAttempt }) => {
       {showDetailModal && selectedPuzzle && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <PuzzleDetail 
-              puzzle={selectedPuzzle}
-              onClose={closeDetailModal}
-            />
-          </div>
-        </div>
-      )}
+            <div className="puzzle-detail-content">
+              <button onClick={closeDetailModal} className="modal-close-button">✕</button>
+              <h2>{selectedPuzzle.name}</h2>
+              <p className="puzzle-description">{selectedPuzzle.description}</p>
 
-      {/* Puzzle Solution Modal */}
-      {showSolutionModal && selectedPuzzle && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <button onClick={closeSolutionModal} className="modal-close-button">✕</button>
-            <h2>Solve: {selectedPuzzle.name}</h2>
-            <p className="puzzle-description">{selectedPuzzle.description}</p>
+              {selectedPuzzle.hint && (
+                <div className="puzzle-hint">
+                  <h3>Hint:</h3>
+                  <p>{selectedPuzzle.hint}</p>
+                </div>
+              )}
 
-            {selectedPuzzle.hint && (
-              <div className="puzzle-hint">
-                <h3>Hint:</h3>
-                <p>{selectedPuzzle.hint}</p>
-              </div>
-            )}
+              {!selectedPuzzle.completed ? (
+                <form onSubmit={(e) => handleSubmit(e, selectedPuzzle.id)} className="solution-form">
+                  <input
+                    name={`keyword-${selectedPuzzle.id}`}
+                    placeholder="Enter solution keyword"
+                    className="solution-input"
+                  />
+                  <button type="submit" className="submit-button">
+                    Submit Solution
+                  </button>
+                </form>
+              ) : (
+                <div className="completed-message">
+                  <h3>✅ Puzzle Completed!</h3>
+                  <p>Great job solving this puzzle!</p>
+                </div>
+              )}
 
-            {!selectedPuzzle.completed ? (
-              <form onSubmit={(e) => handleSubmit(e, selectedPuzzle.id)} className="solution-form">
-                <input
-                  name={`keyword-${selectedPuzzle.id}`}
-                  placeholder="Enter solution keyword"
-                  className="solution-input"
-                />
-                <button type="submit" className="submit-button">
-                  Submit Solution
-                </button>
-              </form>
-            ) : (
-              <div className="completed-message">
-                <h3>✅ Puzzle Completed!</h3>
-                <p>Great job solving this puzzle!</p>
-              </div>
-            )}
-
-            {message && (
-              <div className={`message ${message.type}`}>
-                {message.text}
-              </div>
-            )}
+              {message && (
+                <div className={`message ${message.type}`}>
+                  {message.text}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
